@@ -1,2 +1,2 @@
 # careaxiomInterview
-Questions for the interview present here.
+Questions for the interview are here.
