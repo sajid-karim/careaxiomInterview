@@ -1,0 +1,19 @@
+{
+  "name": "exampleserver",
+  "version": "1.0.0",
+  "description": "This is for basic control flow understanding",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Sajid Karim",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.2.3",
+    "axios": "^0.25.0",
+    "node-fetch": "^2.6.7",
+    "rsvp": "^4.8.5",
+    "step": "^1.0.0"
+  }
+}
