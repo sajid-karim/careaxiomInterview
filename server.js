@@ -1,58 +1,80 @@
 const express = require('express')
-const axios = require('axios')
-
+const request = require('request')
 
 let app = express();
 let port = 8000
 
-app.get('/I/want/title/', async(req, resp) => {
+
+app.get('/I/want/title/', (req, resp) => {
 
     address = req.query
-    let titles = []
-    if(typeof(address['address']) === 'string'){
-        reqUrl = address['address']
-        await axios.get(`https://${reqUrl}`)
-                .then(res =>{
-                    console.log(res.data)
-                })
-                .catch(error =>{
-                    console.log(error)
-                })
-    }
-    else{
-        endpoints = address['address']
-        endpoints.map(element => {
-            titles.push(axios.get(`http://${element}`))
-        })
-    }
     let respArray = []
-    Promise.all(titles).then((result)=>{
-        result.forEach((res)=>{
-            data = res.data
-            let title = data.substring(data.indexOf('<title>')+7, data.lastIndexOf('</title>'))
-            respArray.push(title)
-            console.log(title)
+    if (typeof (address['address']) === 'string') {
+        reqUrl = address['address']
+        request(`http://${reqUrl}`, (err, res, body) => {
+            if (err) {
+                console.log(`${err}`)
+            }
+
+            let title = body.substring(body.indexOf('<title>') + 7, body.lastIndexOf('</title>'))
+            resp.send(`
+                                    <!DOCTYPE html>
+                                    <html>
+                                        
+                                        <head></head>
+                                        
+                                        <body>
+                                            <h1> Following are the titles of given websites: </h1>
+                                            <ul>
+                                                ${title}
+                                            </ul>
+                                        </body>
+                                        
+                                    </html>    
+                    `)
+
         })
-        respArray.forEach((element,index)=>{
-            respArray.splice(index,`<li>${element}</li><br>`)
+    }
+    else {
+        endpoints = address['address']
+        len = endpoints.length
+        respArray = [len]
+        responses = endpoints.map((endpoint) => {
+            request(`http://${endpoint}`, (err,res,body)=>{
+            if(err)
+            {
+                console.log(err)
+                resp.send(err)
+            }
+
+            if(body)
+            {
+                let title = body.substring(body.indexOf('<title>') + 7, body.lastIndexOf('</title>'))
+                respArray.push(title)
+                if(respArray.length === respArray[0])
+                {
+                    respArray.splice(0, 1)
+                    resp.send(`
+                                    <!DOCTYPE html>
+                                    <html>
+                                        
+                                        <head></head>
+                                        
+                                        <body>
+                                            <h1> Following are the titles of given websites: </h1>
+                                            <ul>
+                                                ${respArray}
+                                            </ul>
+                                        </body>
+                                        
+                                    </html>    
+                    `)
+                }
+            }
+                
+            });
         })
-        resp.send(`
-        <!DOCTYPE html>
-<html>
-
-<head></head>
-
-<body>
-    <h1> Following are the titles of given websites: </h1>
-    <ul>
-        ${respArray}
-    </ul>
-</body>
-
-</html>    
-        `)
-    })
-    
+    }
 })
 
 app.listen(port, () => {
